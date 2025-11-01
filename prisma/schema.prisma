@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  password      String
+  profileImage  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  expenses      Expense[]
+  incomes       Income[]
+  budgets       Budget[]
+  investments   Investment[]
+  categories    Category[]
+}
+
+model Expense {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  amount      Float
+  date        DateTime
+  category    String
+  description String?
+  paymentMode String   // cash, card, upi
+  receipt     String?  // URL to receipt image
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Income {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  amount      Float
+  date        DateTime
+  category    String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Budget {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  category    String
+  limit       Float
+  spent       Float    @default(0)
+  month       Int
+  year        Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Investment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  type          String   // stocks, mutual_funds, crypto, gold
+  quantity      Float
+  buyPrice      Float
+  currentPrice  Float
+  totalValue    Float
+  investedDate  DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  userId        String   @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  type      String   // expense or income
+  icon      String
+  color     String
+  createdAt DateTime @default(now())
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
